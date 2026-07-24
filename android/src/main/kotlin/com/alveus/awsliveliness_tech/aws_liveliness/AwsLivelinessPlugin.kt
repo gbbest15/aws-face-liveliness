@@ -98,37 +98,41 @@ class AwsLivelinessPlugin :
         }
     }
 
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        if (call.method != "startLivenessCheck") {
-            result.notImplemented()
-            return
+   override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+    when (call.method) {
+        "getPlatformVersion" -> {
+            result.success("Android ${android.os.Build.VERSION.RELEASE}")
         }
-        val currentActivity = activity
-        if (currentActivity == null) {
-            result.error("NO_ACTIVITY", "Plugin not attached to an activity", null)
-            return
-        }
-        val sessionId = call.argument<String>("sessionId")
-        val region = call.argument<String>("region")
-        if (sessionId == null || region == null) {
-            result.error("BAD_ARGS", "Missing sessionId or region", null)
-            return
-        }
+        "startLivenessCheck" -> {
+            val currentActivity = activity
+            if (currentActivity == null) {
+                result.error("NO_ACTIVITY", "Plugin not attached to an activity", null)
+                return
+            }
+            val sessionId = call.argument<String>("sessionId")
+            val region = call.argument<String>("region")
+            if (sessionId == null || region == null) {
+                result.error("BAD_ARGS", "Missing sessionId or region", null)
+                return
+            }
 
-        pendingResult = result
-        pendingSessionId = sessionId
-        pendingRegion = region
+            pendingResult = result
+            pendingSessionId = sessionId
+            pendingRegion = region
 
-        if (ContextCompat.checkSelfPermission(currentActivity, Manifest.permission.CAMERA)
-            == PackageManager.PERMISSION_GRANTED
-        ) {
-            launchLiveness(currentActivity, sessionId, region)
-        } else {
-            ActivityCompat.requestPermissions(
-                currentActivity, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE
-            )
+            if (ContextCompat.checkSelfPermission(currentActivity, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                launchLiveness(currentActivity, sessionId, region)
+            } else {
+                ActivityCompat.requestPermissions(
+                    currentActivity, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE
+                )
+            }
         }
+        else -> result.notImplemented()
     }
+}
 
     private fun launchLiveness(activity: Activity, sessionId: String, region: String) {
         val intent = Intent(activity, LivenessActivity::class.java).apply {
