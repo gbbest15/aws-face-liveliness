@@ -33,3 +33,4 @@ migrate_working_dir/
 /coverage/
 example/android/app/src/main/res/raw/amplifyconfiguration.json
 **/amplifyconfiguration.json
+**/awsconfiguration.json

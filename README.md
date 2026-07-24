@@ -7,7 +7,7 @@ to launch a native liveness check and get a pass/fail result back.
 |             | Android | iOS |
 |-------------|:-------:|:---:|
 | Support     |   ✅    | ✅  |
-| Min version | API 24  | iOS 13 |
+| Min version | API 24  | iOS 14 |
 
 > ⚠️ This plugin only handles the **client-side detection UI**. Creating a
 > liveness session (`CreateFaceLivenessSession`) must happen on **your
@@ -154,8 +154,8 @@ No further native setup is required — the plugin's own manifest merges the
    <string>This app uses the camera to verify you're a real person.</string>
    ```
 
-5. **Set the minimum iOS deployment target to 13.0** in your Xcode project
-   settings (or `platform :ios, '13.0'` in `ios/Podfile` if you're using
+5. **Set the minimum iOS deployment target to 14.0** in your Xcode project
+   settings (or `platform :ios, '14.0'` in `ios/Podfile` if you're using
    CocoaPods instead of Swift Package Manager).
 
 The plugin supports both dependency managers — you don't need to choose;

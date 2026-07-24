@@ -17,7 +17,7 @@ public class AwsLivelinessPlugin: NSObject, FlutterPlugin {
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
-        case "aws_liveliness":
+        case "startLivenessCheck":
             guard let args = call.arguments as? [String: Any],
                   let sessionID = args["sessionId"] as? String,
                   let region = args["region"] as? String else {
@@ -31,7 +31,14 @@ public class AwsLivelinessPlugin: NSObject, FlutterPlugin {
     }
 
     private func startLiveness(sessionID: String, region: String, result: @escaping FlutterResult) {
-        ensureAmplifyConfigured()
+        guard ensureAmplifyConfigured() else {
+            result(FlutterError(
+                code: "AMPLIFY_MISCONFIGURED",
+                message: "Amplify is configured without AWSCognitoAuthPlugin/AWSPredictionsPlugin, and plugins cannot be added after configure(). Configure Amplify with these plugins before calling startLivenessCheck, or let this plugin configure Amplify first.",
+                details: nil
+            ))
+            return
+        }
 
         guard let rootVC = Self.currentRootViewController() else {
             result(FlutterError(code: "NO_ROOT_VC", message: "Could not find a presenting view controller", details: nil))
@@ -50,19 +57,36 @@ public class AwsLivelinessPlugin: NSObject, FlutterPlugin {
         }
     }
 
-    /// Configures Amplify only if the host app hasn't already. Safe to call
-    /// on every check — never crashes on a host app that configures Amplify itself.
-    private func ensureAmplifyConfigured() {
+    /// Ensures Amplify is configured with the plugins Liveness needs.
+    /// We can't check `Amplify.isConfigured` directly (it's `internal`), so
+    /// we try to add + configure, and if that fails (most likely because the
+    /// host app already called `Amplify.configure()`), we fall back to
+    /// checking whether AWSPredictionsPlugin is already reachable.
+    /// Returns `true` if Predictions is usable, `false` otherwise.
+    @discardableResult
+    private func ensureAmplifyConfigured() -> Bool {
         do {
             try Amplify.add(plugin: AWSCognitoAuthPlugin())
             try Amplify.add(plugin: AWSPredictionsPlugin())
             try Amplify.configure()
-        } catch let error as ConfigurationError where "\(error)".contains("already been configured") {
-            // Already configured by host app — safe to ignore.
-        } catch let error as PluginError where "\(error)".contains("already been added") {
-            // Plugin already added by host app — safe to ignore.
+            return true
         } catch {
-            print("aws_liveliness: Amplify configure skipped/failed: \(error)")
+            // Likely already configured by the host app (or plugins already
+            // added). Verify Predictions is actually usable rather than
+            // trusting the error message.
+            do {
+                _ = try Amplify.Predictions.getPlugin(for: "awsPredictionsPlugin")
+                return true
+            } catch {
+                print("""
+                aws_liveliness: Amplify configuration issue — \(error). \
+                If Amplify was already configured by the host app, it must \
+                include AWSCognitoAuthPlugin and AWSPredictionsPlugin BEFORE \
+                calling Amplify.configure(), since plugins cannot be added \
+                afterward.
+                """)
+                return false
+            }
         }
     }
 
