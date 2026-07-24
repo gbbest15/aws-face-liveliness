@@ -70,22 +70,42 @@ A minimal flow looks like:
    <uses-permission android:name="android.permission.CAMERA"/>
    ```
 
-3. **Add the required dependencies** to `android/app/build.gradle.kts`
+3. **Add the required plugins** to `android/settings.gradle.kts`:
+
+   ```kotlin
+   plugins {
+       id("dev.flutter.flutter-plugin-loader") version "1.0.0"
+       id("com.android.application") version "8.9.1" apply false
+       id("org.jetbrains.kotlin.android") version "2.3.20" apply false
+       id("org.jetbrains.kotlin.plugin.compose") version "2.3.20" apply false
+   }
+   ```
+
+4. **Add the required dependencies** to `android/app/build.gradle.kts`
    (or `build.gradle` if you're not on Kotlin DSL):
 
    ```kotlin
    dependencies {
-       implementation("com.amplifyframework.ui:liveness:1.5.0")
+       implementation("com.amplifyframework.ui:liveness:1.4.0")
        implementation("com.amplifyframework:aws-auth-cognito:2.29.0")
        implementation("com.amplifyframework:aws-predictions:2.29.0")
        implementation("androidx.activity:activity-compose:1.9.3")
        implementation(platform("androidx.compose:compose-bom:2024.10.00"))
-       implementation("androidx.compose.material3:material3:1.1.2")
-       coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+       implementation("androidx.compose.material3:material3")
+       implementation("androidx.appcompat:appcompat:1.7.0")
+       coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
    }
    ```
 
-4. **Set `minSdkVersion` to 24** in `android/app/build.gradle`:
+5. **Enable Compose compiler** in `android/app/build.gradle.kts` by adding the plugin:
+
+   ```kotlin
+   plugins {
+       id("org.jetbrains.kotlin.plugin.compose")
+   }
+   ```
+
+6. **Set `minSdkVersion` to 24** in `android/app/build.gradle`:
 
    ```gradle
    android {
