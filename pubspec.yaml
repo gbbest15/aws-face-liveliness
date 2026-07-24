@@ -1,9 +1,12 @@
 name: aws_liveliness
 description: A Flutter plugin for AWS Amplify Face Liveness detection on Android and iOS.
 version: 0.0.1
-homepage: https://github.com/yourusername/aws_liveliness
-repository: https://github.com/yourusername/aws_liveliness
-issue_tracker: https://github.com/yourusername/aws_liveliness/issues
+homepage: https://github.com/gbbest15/aws-face-liveliness
+repository: https://github.com/gbbest15/aws-face-liveliness
+issue_tracker: https://github.com/gbbest15/aws-face-liveliness/issues
+
+
+# publish_to: 'none'
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

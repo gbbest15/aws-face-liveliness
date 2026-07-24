@@ -33,6 +33,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
     sourceSets {
@@ -74,4 +75,19 @@ kotlin {
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.mockito:mockito-core:5.0.0")
+
+    implementation("com.amplifyframework.ui:liveness:1.5.0")
+
+    // Amplify Auth dependency — needed for Cognito credentials
+    implementation("com.amplifyframework:aws-auth-cognito:2.29.0")
+
+    implementation("com.amplifyframework:aws-predictions:2.29.0")
+
+    // Compose + Material3 for the liveness UI
+    implementation("androidx.activity:activity-compose:1.9.3")
+    implementation(platform("androidx.compose:compose-bom:2024.10.00"))
+    implementation("androidx.compose.material3:material3:1.1.2")
+
+    // Support for Java 8+ features (required by Amplify)
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }

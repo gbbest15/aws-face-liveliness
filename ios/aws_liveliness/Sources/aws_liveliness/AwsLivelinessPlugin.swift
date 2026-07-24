@@ -53,21 +53,25 @@ public class AwsLivelinessPlugin: NSObject, FlutterPlugin {
     /// Configures Amplify only if the host app hasn't already. Safe to call
     /// on every check — never crashes on a host app that configures Amplify itself.
     private func ensureAmplifyConfigured() {
-        guard !Amplify.isConfigured else { return }
         do {
             try Amplify.add(plugin: AWSCognitoAuthPlugin())
             try Amplify.add(plugin: AWSPredictionsPlugin())
             try Amplify.configure()
+        } catch let error as ConfigurationError where "\(error)".contains("already been configured") {
+            // Already configured by host app — safe to ignore.
+        } catch let error as PluginError where "\(error)".contains("already been added") {
+            // Plugin already added by host app — safe to ignore.
         } catch {
-            // Swallow "already added" style errors from a race with host app config;
-            // anything else will surface clearly when startLivenessCheck fails downstream.
             print("aws_liveliness: Amplify configure skipped/failed: \(error)")
         }
     }
 
     private static func currentRootViewController() -> UIViewController? {
-        UIApplication.shared.connectedScenes
-            .compactMap { ($0 as? UIWindowScene)?.keyWindow }
-            .first?.rootViewController
+        let keyWindow = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }
+
+        return keyWindow?.rootViewController
     }
 }
