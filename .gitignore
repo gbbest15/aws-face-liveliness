@@ -31,3 +31,5 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 /build/
 /coverage/
+example/android/app/src/main/res/raw/amplifyconfiguration.json
+**/amplifyconfiguration.json
